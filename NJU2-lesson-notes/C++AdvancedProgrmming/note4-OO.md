@@ -559,4 +559,144 @@ int *p = new int[12];
   }
   ```
 
-  
+
+> 2022.04.20
+
+```cpp
+// ------------------------ const 成员函数 ----------------------------
+void f(A* const this); // => void f(A* const this); 只是限定指针不变
+void show() const; // => void show(const A* const this); 限定指针和指针所指向的内容都不变，a逻辑const
+
+// ------------------------ 以下代码是正确的 ----------------------------
+class A{
+  int a;
+  int & indirect_int; 
+public:
+  A():indirect_int(*new int){/*...*/}
+  ~A(){delete &direct_int;}
+  void f() const {indirect_int++;} // 为什么这里不报错?因为indirect_int存放的是地址，indirect_int++;是对其指向的变量++，所以indirect_int的内容并未改变，故未报错
+};
+// 可以使用mutable限定符，允许变量不受const A* 的限制，不受按逻辑const
+```
+
+- 静态成员
+
+  - 类刻画了一组具有相同属性的对象
+
+  - 对象是类的实例
+
+  - 问题：同一个类的不同对象如何共享变量
+
+    - 如果把这些共享变量定义为全局变量，则缺乏数据保护
+    - 名污染(namespace)
+
+  - static 成员变量
+
+    ```cpp
+    class A{
+        int x, y;
+        static int shared;
+        static const int z = 0; // 需要在声明处定义
+        
+    };
+    int A::shared = 0; // 应该出现在类的外部，而且只出现一次，故在类的实现文件中定义
+    ```
+
+- 静态成员函数
+
+  - 只能存取静态成员变量，调用静态成员函数
+
+  - 支持：“类也是对象”
+
+  - 既可以通过对象来使用`A a; a.f();`也可以通过类来使用`A::f()`
+
+  - 用于对共享信息进行统计和使用、控制对象的创建和析构等
+
+    ```cpp
+    // Resource Contorl
+    // 谁创建谁归还
+    class singleton{
+        private:
+        	singleton(){}
+        	singleton(const singleton &);
+        public:
+        	static singleton * instance(){
+                return m_instance == NULL ? m_instance = new singleton : m_instance;
+            }
+        	static void destory(){delete m_instance;m_instance=NULL;}
+       	private:
+        	static singleton * m_instance;
+    };
+    singleton * singleton::m_instance = NULL;
+    ```
+
+- 友元
+
+  - 类外部不能访问该类的private成员
+
+    - 通过该类的public成员
+    - 会降低对private成员的访问效率，缺乏灵活性
+    - 例：矩阵类、向量类和全局函数，全局函数实现矩阵和向量的相乘
+
+  - 分类
+
+    - 友元函数
+    - 友元类
+    - 友元类成员函数
+
+  - 作用
+
+    - 提高程序设计灵活性
+    - 数据保护和对数据的存取效率之间的一个折中方案
+
+    ```cpp
+    // 一定要遵循：先声明后使用
+    // 声明友元时，最好在前面已经声明过了
+    void func();
+    class B; // 前项声明
+    class C{
+        void f();
+    };
+    class A{
+        friend void foo(B &b); // 这里的参数只能声明成指针或引用，因为此时并没有B的定义，编译器不知道B的大小。
+        friend void func();
+        friend class B;
+        friend void C::f(); // 友元类成员函数，要确保该成员函数在该类中先出现
+    }
+    
+    // ---------------------------- 互为友元 ---------------------------------
+    class B;
+    class A{
+        int a;
+      public:
+        void show(B &b);
+        friend class B;
+    };
+    class B{
+        int b;
+      public:
+        void show(A &a);
+        friend class A;
+    };
+    // 这段代码一定要放在源文件B的定义之后
+    void A::show(B &b){
+        std::cout << b.b;
+    }
+    ```
+
+- 原则
+
+  - 避免将data member放在公开接口中
+
+  - 努力让接口**完满且最小化**
+
+    ```cpp
+    /**
+    * no access => none
+    * readonly => get
+    * writeonly => set
+    * readandwrite => get + set
+    **/
+    ```
+
+    
