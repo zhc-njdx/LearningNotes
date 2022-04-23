@@ -1,0 +1,24 @@
+succeeded to alloc object 4
+succeeded to alloc object 1
+succeeded to alloc object 2
+succeeded to alloc object 3
+succeeded to free object 3
+succeeded to free object 2
+succeeded to free object 1
+succeeded to free object 4
+00000008
+dfdfdfdf
+dfdfdfdf
+00000008
+00000008
+dfdfdfdf
+dfdfdfdf
+00000008
+00000008
+dfdfdfdf
+dfdfdfdf
+00000008
+00000008
+dfdfdfdf
+dfdfdfdf
+00000008

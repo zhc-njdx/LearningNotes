@@ -1,0 +1,70 @@
+succeeded to alloc object 1
+succeeded to alloc object 2
+succeeded to alloc object 3
+succeeded to free object 3
+succeeded to free object 1
+invalid memory access
+00000008
+dfdfdfdf
+dfdfdfdf
+00000008
+00000009
+dfdfdfdf
+dfdfdfdf
+00000009
+000000d0
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+dfdfdfdf
+000000d0
+00000000
+00000000
