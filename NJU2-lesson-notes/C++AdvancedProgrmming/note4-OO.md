@@ -686,10 +686,12 @@ public:
 
 - 原则
 
+  - Law of Demeter
+
   - 避免将data member放在公开接口中
 
   - 努力让接口**完满且最小化**
-
+  
     ```cpp
     /**
     * no access => none
@@ -698,5 +700,230 @@ public:
     * readandwrite => get + set
     **/
     ```
+  
 
-    
+> 2022.04.22
+
+#### 继承
+
+- 基于目标代码的复用
+  - 复用实现
+  - 复用接口
+- 对事物进行分类
+  - 派生类是基类的具体化
+  - 把事物（概念）以层次结构表示出来，有利于描述和解决问题
+- 增量开发
+
+##### 单继承
+
+```cpp
+class Student{
+    int id;
+  public:
+    char nickname[16];
+    void set_ID(int x){id = x;}
+    void SetNickName(char *s){strcpy(nickname,s);}
+    void showInfo(){
+        cout << nickname << ": " << id << endl;
+    }
+};
+
+// class 与 struct 的区别仅仅是:
+// class 默认访问控制权限是private
+// struct 默认访问控制权限是public
+
+// : 表示继承
+// 类要作为基类，必须声明和定义
+
+// protected: 派生类可以访问基类的受保护成员，但是不能访问基类对象的受保护成员
+// 但是创建了对象之后，protected和private一样
+
+// 派生类不能访问基类的private成员
+// 派生类的内存中包括基类和派生类的所有数据成员
+// 构造函数、拷贝构造函数和析构函数等和资源创建相关的函数不能被继承，因为派生类一般都比基类的资源更多
+
+// 派生类改变基类中变量的访问控制:
+// 只能向控制访问范围小的方向改变
+// 在派生类中使用基类的成员变量，要添加作用域限定符 Student::nickname，以表示此成员变量是来源于基类
+// 如果 直接声明 char nickname[16]; 那么此成员变量的名空间为 派生类
+
+// 继承方式：public private protected
+// 继承方式的不同仅对派生类的用户有区别，而对派生类本身无区别
+// 对于private继承，派生类的用户（例如继承于派生类的类）就不能访问基类的成员
+
+class Undergraduated_Student : public Student{
+    int dept_no;
+  public:
+    void setDeptNo(int x){dept_no = x;}
+    void showInfo(int x){...}
+    using Student::showInfo; // 引入Student中的showInfo函数
+};
+
+Undergraduated_Student us;
+us.showInfo(); // 报错
+// 调用方法时，编译器会在派生类的名空间下寻找同名函数，找到了名称相同的函数就不会再继续寻找
+// 派生类中一旦重载了基类中的某个函数，基类中同名函数会被隐藏(函数隐藏)
+// 解决方法: 使用 using 引入基类名空间下的同名函数
+```
+
+##### 友元和protected
+
+> 友元类和友元函数都是定义在类外，是独立的。只是被赋予了访问类中private和protected成员的权限
+
+```cpp
+class Base{
+  protected:
+    int prot_mem; 					// protected 成员
+};
+class Sneaky : public Base{
+    friend void clobber(Sneaky&); 	// 能访问Sneaky::prot_mem
+    friend void clobber(Base&); 	// 不能访问Base::prot_mem
+    int j;							// private成员
+}
+
+void clobber(Sneaky &s){
+    s.j = s.prot_mem = 0; 			// 正确 clobber能访问Sneaky对象的private和protect成员
+}
+
+void clobber(Base& b){				// 派生类的友元不能访问基类对象的protected成员
+    b.prot_mem = 0;					// 错误 clobber不能访问Base的protected成员
+}
+```
+
+> 友元是不能传递的。派生类的友元不是基类的友元。基类的友元也不是派生类的友元
+
+##### 继承
+
+- 派生类对象的初始化
+
+  - 由基类和派生类共同完成
+
+- 构造函数的执行次序
+
+  - 基类的构造函数
+
+    - 缺省执行基类的默认构造函数
+
+    - 如果要执行基类的非默认构造函数，则必须在派生类构造函数的成员初始化表中指出
+
+      `B(int i, int j):A(i){y=j;}`
+
+    - > 拷贝构造函数：
+      >
+      > `B(const B& b){...}`
+      >
+      > 由于自定义了拷贝构造函数，编译器默认程序员接管了拷贝构造，便不会提供默认拷贝构造函数。当`B b2(b1)`时，由于A没有拷贝构造函数，就会调用构造函数对A进行初始化。
+      >
+      > 为了调用A的拷贝构造函数，B的拷贝构造函数应该写成`B(const B& b):A(b){...}`
+
+    - `using A::A;` // "继承"A的构造函数
+
+  - 派生类对象成员类的构造函数
+
+  - 派生类的构造函数
+
+- 析构函数的执行次序
+
+  - 与构造函数相反
+
+##### 虚函数
+
+- 类型相容
+
+  - 类、类型
+
+  - 类型相容、赋值相容
+
+  - 问题：a、b是什么类型时，a = b 合法？
+
+    - ```cpp
+      class A;
+      class B : public A;
+      A a; B b;
+      a = b;
+      // 对象的身份已经发生变化，对象切片
+      // 属于派生类的属性已经不存在
+      // 赋值运算符右边，b的身份已经变成了A，原本属于派生类中的另外的属性被移除
+      
+      B *pb; A *pa = pb;
+      B b; A &a = b;
+      // 对象的身份没有发生变化(和Java类似)
+      ```
+
+- 函数调用
+
+  ```cpp
+  class A{
+      int x, y;
+    public:
+      void f();
+  };
+  class B : public A{
+      int z;
+    public:
+      void f();
+      void g();
+  };
+  
+  A a;
+  B b;
+  
+  a = b;				// OK 发生对象切片
+  b = a;				// Error
+  a.f();				// A::f()
+  
+  A &r_a = b;			// OK
+  A *p_a = &b;		// OK
+  
+  B &r_b = a;			// Error
+  B *p_b = &a;		// Error
+  
+  func1(A& a){
+      ...
+      a.f();			
+      ...
+  }
+  
+  func2(A *pa){
+      ...
+      pa->f();		
+      ...
+  }
+  
+  func1(b);			// A::f()
+  func2(&b);			// A::f()
+  
+  // 对于一般的成员函数，编译器根据静态绑定，根据对象的静态类型
+  ```
+
+  - 前期绑定/静态绑定（Early Binding）
+    - 编译时刻
+    - 依据对象的静态类型
+    - 效率高、灵活性差
+  - 动态绑定/后期绑定（Late Binding）
+    - 运行时刻
+    - 依据对象的实际类型（动态）
+    - 效率低、灵活性高
+  - 注重效率
+    - 默认前期绑定
+    - 后期绑定需要显式说明   **virtual**
+
+- 定义
+
+  - virtual
+
+    ```cpp
+    class A{
+        ...
+      public:
+        virtual void f();
+    };
+    ```
+
+  - 动态绑定
+
+    - 根据实际引用和指向的对象类型
+
+  - 方法覆盖 override
+
+  - 基类的虚函数，派生类中也是虚函数
