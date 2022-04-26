@@ -26,3 +26,8 @@
 
 - 完成挂载
 
+> 实现开机自动挂载：
+>
+> 修改/etc/fstab文件，增加下面这行
+>
+> tmp	/mnt/tmp	vboxsf	rw,auto	0	0 
