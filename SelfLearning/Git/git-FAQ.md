@@ -15,3 +15,11 @@ git config --global http://127.0.0.1:<代理端口号> # mine is 3
 git config --global https://127.0.0.1:<代理端口号>
 ```
 
+#### 3  Failed to connect to 127.0.0.1 port 33210: Connection refused
+
+> 取消代理
+
+```shell
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
