@@ -293,4 +293,170 @@ result.n = n*r.n; result.d = d*r.d; return result;
     }
     ```
 
+
+
+
+#### 特殊操作符重载
+
+- **=**
+
+  - 默认赋值操作符重载函数
+
+    - 逐个成员赋值
+    - 对含有对象成员的类，该定义是递归的
+
+  - 赋值操作符重载不能被继承
+
+    Why？派生出来的类存在基类中没有的资源，继承来的赋值操作符不能对额外的资源进行赋值
+
+  - ```cpp
+    // 返回值是什么？
+    // 应该返回该类型的引用，支持链式赋值
+    // (a = b).f() 返回值前不能加const，返回值有可能被改变 f()不一定是常成员函数
+    <Type>& operator=(<Type>& ){
+        //...
+        return *this;
+    }
+    ```
+
+  - ```cpp
+    class A{
+        int x, y;
+        char* p;
+      public:
+        A(){}
+        ~A(){}
+        // 区别于拷贝构造函数：此时对象已经创建，已经分配了内存
+        // 而拷贝构造函数中对象并未创建
+        A& operator=(A& a){
+            x = a.x; y = a.y;
+            delete[] p; // 先把分配的空间释放
+            // 有可能出现异常，空间不够，导致该对象不完整
+            // 可以先将p保存下来，然后对p赋值，最后再delete p
+            p = new char[strlen(a.p)+1];
+            strcpy(p, a.p);
+            return *this;
+        }
+    }
+    
+    A a1, b;
+    a1 = b; // 调用赋值操作符重载，a1已创建
+    
+    A a2 = b; // 调用拷贝构造函数，a2此时并未创建，可以写成 A a2(b)
+    ```
+
+  - 避免自我赋值
+
+    ```cpp
+    // Identity test	证同测试
+    // Content	
+    // Same memory location	是否是相同地址，但是存在不同对象但是其中的内容相同的，例如有相同的指针
+    // Object identifier	
+    
+    // 先创建后删除
+    // 也可以保证自我赋值时的正确性
+    A& operator=(A& a){
+        x = a.x; y = a.y;
+        char *oldp_lhs = p; // 赋值失败时可以回滚
+        char *oldp_rhs = a.p; // 避免自我赋值时，失去对原来那块地址空间的引用
+        p = new char[strlen(oldp_rhs)+1];
+        strcpy(p, oldp_rhs);
+        delete[] oldp;
+        return *this;
+    }
+    ```
+
+- **[]**(下标操作符)
+
+  - ```cpp
+    class string{
+        char *p;
+      public:
+        string(){}
+        // ------- version1 --------
+        char& operator[](int i) const{ // 可以声明为const成员函数，因为没有更改 p
+            return p[i];
+        }
+        // ------- version2 --------
+        // 参数是：string* const this, int i
+        char& operator[](int i){ return p[i]; }
+        // 参数是：const string* const this, int i
+        const char operator[](int i) const { return p[i]; }
+    };
+    
+    string s("aacd"); s[2] = 'b'; // 针对非const string对象，[]应该返回 char& 能更改，能打印
+    const string cs("const"); cout << cs[0]; cs[0]='D'; // 针对const string对象，[]应该返回 const char 不能更改，只能打印
+    ```
+
+  - 多维数组
+
+    ```cpp
+    // wrapper
+    // 用wrapper类来封装!!!
+    class Array2D{
+      public:
+        class Array1D(int *p){
+          public:
+            // 加上explicit可以避免隐式类型转换
+            Array1D(int *p){this->p = p;}
+            int& operator[](int i){return p[i];}
+            const int operator[](int i) const {return p[i];}
+          private:
+            int *p;
+        };
+        Array2D(int n1, int n2){
+            p = new int[n1*n2];
+            num1 = n1;
+            num2 = n2;
+        }
+        virtual ~Array2D(){delete[] p;}
+        // 存在隐式类型转换
+        Array1D operator[](int i){return p + i * num2;}
+        const Array1D operator[](int i) const {return p + i * num2;}
+      private:
+        int *p;
+        int num1, num2;
+    };
+    ```
+
+- **()**(函数调用操作符、类型转换操作符)
+
+  - 函数调用操作符
+
+    ```cpp
+    class Func{
+        double para;
+        int lowerBound, upperBound;
+      public:
+        double operator()(double, int, int);
+    };
+    
+    Func f; // 函数对象，让对象像函数一样去使用
+    f(2.4,0,8);
+    ```
+
+  - 类型转换操作符
+
+    - 基本数据类型
+    - 自定义类
+
+    ```cpp
+    // 减少混合运算中需要定义的操作符重载函数的数量
+    class Rational{
+      public:
+        Rational(){}
+        // 没有参数和返回类型，返回类型由函数名指定
+        operator double(){return (double)n/d;}
+      private:
+        int n, d;
+    };
+    
+    Rational r(1,2);
+    double x = r; x = x + r; // 由于类型转换操作符的重载，可以不必重载+、*d
+    
+    //
+    ostream f("abc.txt");
+    if (f) ... // 存在类型转换操作符的重载
+    ```
+
     
