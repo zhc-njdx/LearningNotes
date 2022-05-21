@@ -12,7 +12,7 @@
 
 ### 2 Network Programming
 
-#### 2.1 get_URL (webget.cc)
+#### 2.1 get_URL (sponge/apps/webget.cc)
 
 > 2022.05.18 完成
 
@@ -79,4 +79,64 @@ Test project /home/cs144/sponge/build
 Total Test time (real) =   6.24 sec
 [100%] Built target check_webget
 ```
+
+#### 2.2 in-memory reliable byte stream(sponge/libsponge/byte_stream.cc && byte_stream.hh)
+
+> 2022.05.21 完成
+
+##### 要点
+
+实验目的是完成一个 ByteStream 类，使得该类可以抽象一个 reliable byte stream (关键在于reliable，建立在reliable的前提下，所以后续很多情况并未考虑)
+
+要点在于理解ByteStream类的工作过程，虽说是模拟TCP协议下双方的数据传输，但是 ByteStream只是一个简单的抽象：1、不考虑数据传输的时间，也不考虑数据丢失乱序等情况，是直接的 input side write into buffer while output side read from the buffer；2、存在流量控制，即buffer的大小（需要设计buffer的数据结构）
+
+##### 过程
+
+1、一开始还考虑了字节的传输过程(stream)，但是根据类中的成员函数可以得出是不需要的
+
+2、对于buffer的数据结构，很快就想到了环形数组
+
+3、抓住了上面两点，整体很快就实现好了
+
+4、debug
+
+- pop_output 就是 read 的意思
+- 在write的时候没考虑data的长度（这个有点离谱）
+- output达到ending有一个前提，inout终止了数据传输
+- peek_output忘记了环形数组的数据结构
+
+##### 结果
+
+```shell
+cs144@cs144vm:~/sponge/build$ make check_lab0
+[100%] Testing Lab 0...
+Test project /home/cs144/sponge/build
+    Start 26: t_byte_stream_construction
+1/9 Test #26: t_byte_stream_construction .......   Passed    0.00 sec
+    Start 27: t_byte_stream_one_write
+2/9 Test #27: t_byte_stream_one_write ..........   Passed    0.00 sec
+    Start 28: t_byte_stream_two_writes
+3/9 Test #28: t_byte_stream_two_writes .........   Passed    0.00 sec
+    Start 29: t_byte_stream_capacity
+4/9 Test #29: t_byte_stream_capacity ...........   Passed    0.44 sec
+    Start 30: t_byte_stream_many_writes
+5/9 Test #30: t_byte_stream_many_writes ........   Passed    0.01 sec
+    Start 31: t_webget
+6/9 Test #31: t_webget .........................   Passed    6.18 sec
+    Start 53: t_address_dt
+7/9 Test #53: t_address_dt .....................   Passed    5.04 sec
+    Start 54: t_parser_dt
+8/9 Test #54: t_parser_dt ......................   Passed    0.00 sec
+    Start 55: t_socket_dt
+9/9 Test #55: t_socket_dt ......................   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =  11.72 sec
+[100%] Built target check_lab0
+```
+
+
+
+![pass截图](C:\Users\lenovo\AppData\Roaming\Typora\typora-user-images\image-20220521185945943.png)
 

@@ -34,6 +34,12 @@ fatal: Authentication failed for 'https://github.com/zhc-njdx/sponge.git/'
 
 [解决](https://stackoverflow.com/questions/68775869/support-for-password-authentication-was-removed-please-use-a-personal-access-to)
 
+> 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
+>
+> 有效期：05-21——06.21
+>
+> git push https://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@github.com/zhc-njdx/sponge.git
+
 #### 5 fatal: unable to access 'https://github.com/zhc-njdx/sponge.git/': gnutls_handshake() failed: Error in the pull function.
 
 ```shell

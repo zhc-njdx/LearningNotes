@@ -94,13 +94,13 @@
   
   class B : public A{
     public:
-      void f(){g();} // void f(B *const this){this->g();}
+      void f(){g();} // void f(B *const this){this->g();} this指针是B类型的，静态绑定到B::g
       void g();
   };
   
   B b;
   A *p = &b;
-  p->f(); // B::f, B::g
+  p->f(); // B::f, B::g // 传
   
   ```
 
@@ -460,5 +460,4 @@ class C: A, B; // 先初始化A，再初始化B
 
 
 > 如果虚基类无法解决同名问题，尽量将继承数减少，改为组合关系。只继承“is-a”关系够强的
-
 
