@@ -38,7 +38,7 @@ fatal: Authentication failed for 'https://github.com/zhc-njdx/sponge.git/'
 >
 > 有效期：05-21——06.21
 >
-> git push https://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@github.com/zhc-njdx/sponge.git
+> git push https://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@github.com/zhc-njdx/sponge.git
 
 #### 5 fatal: unable to access 'https://github.com/zhc-njdx/sponge.git/': gnutls_handshake() failed: Error in the pull function.
 
