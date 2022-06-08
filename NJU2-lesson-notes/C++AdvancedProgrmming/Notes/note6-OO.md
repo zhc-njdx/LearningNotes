@@ -459,4 +459,128 @@ result.n = n*r.n; result.d = d*r.d; return result;
     if (f) ... // 存在类型转换操作符的重载
     ```
 
+- **`->`**（指针间接引用操作符）smart pointer
+
+  - 二元操作符
+
+    重载时按一元操作符重载描述
     
+    ```cpp
+    // a.operator->(f) ??
+    // a.operator->()->f() // 重载->使得返回一个可以使用->操作符的对象即可
+    ```
+    
+  - Prevent memory Leak
+  
+    smart pointer
+  
+    ```cpp
+    class A{
+      public:
+        void f();
+        int g(double);
+        void h(char);
+    };
+    
+    // 下面这段程序，由于程序在任何时候都可能异常退出
+    // 而对象A是分配在堆上的，在退出时不会自动释放，会导致内存泄露
+    // RAII 资源获取即初始化
+    void test(){
+        // A *p = new A;
+        AWrapper p(new A);
+        ...
+        p->f();
+        ...
+        p->g(1.1);
+        ...
+        p->h('A');
+        ...
+    }
+    // 对A类采用一层封装，使得原本在堆上生成的对象转向在栈上生成
+    // 局限性：需要符合compiler控制的生命周期，只能在函数内部使用
+    class AWrapper{
+        A* p;
+      public:
+        AWrapper(A* p){this->p = p;}
+        ~AWrapper(){delete p;}
+        // 重载->
+        A* operator->(){return p;}
+    }
+    ```
+  
+- **new**、**delete**
+
+  - new
+
+    1、调用operator new分配内存（可重载）
+
+    2、调用构造函数
+
+    3、返回对象指针
+
+  - delete
+
+    1、调用析构函数
+
+    2、确定指向分配空间的指针
+
+    3、调用operator delete释放内存空间（可重载）
+
+  - 为什么要重载？
+
+    编译器提供的是通用的；
+
+    频繁调用系统的存储管理，影响效率
+
+    程序自身管理内存，提高效率
+
+  - 方法
+
+    - 一般不作为全局函数，而作为成员函数
+
+    - 调用系统存储分配，申请一块较大的内存
+
+    - 针对该内存，自己管理存储分配、去配
+
+    - 通过重载new和delete实现
+
+    - 重载的new和delete是静态成员
+
+      必须是静态的，不能操纵任何类内数据
+
+      隐式静态，不需要显示声明static
+
+    - 重载的new和delete遵循类的访问控制，可继承
+
+  - 重载new
+
+    - `void* operator new(size_t size, ...)`
+      - 其中在调用的时候并不用自己传入size，而是系统会计算好对象大小并传入。
+      - `...`表示其他实参
+
+    - placement new
+      - 跳过分配内存阶段，直接在以存在的内存空间调用构造函数
+      - `new(p) A`
+
+    - new的重载可以有很多个
+    - 如果重载了new，那么通过new动态创建该类对象时将不再调用内置的（预定义的）new
+    - `operator new` 和 `operator new[]`是两个操作符
+
+  - 重载delete
+
+    - `void operator delete(void *p, size_t size);`
+      - `size`可有可无，被撤销对象的大小
+
+    - delete的重载只能有一个
+    - 如果重载了delete，那么通过delete撤销对象时将不再调用内置的（预定义的）delete
+    - 尽管已经重载了new和delete，但是还是可以调用全局下的new和delete。
+      - `::operator new` 和 `::operator delete`
+
+  - **一个针对Person类的内存池管理**
+
+    - 内存池类，总体管理
+    - 节点链表类，链表形式串联内存节点
+    - 内存节点类，用于管理内存池申请到的空间，从效率的考虑我们决定一次申请多个Person的空间
+    - Object类，用于包装Person，在内存节点中形成链表
+    - Person类运算符重写
+
