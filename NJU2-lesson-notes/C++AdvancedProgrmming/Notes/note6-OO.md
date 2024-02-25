@@ -112,7 +112,7 @@ ostream& operator<<(ostream& o, Day& d){ // return ostream& 支持链式调用
 
 
 
-- 可重载的操作符
+- 不可重载的操作符
 
   - .(成员访问运算符)、.*(成员指针访问运算符)、::(域运算符)、?:(条件运算符，存在跳转性质，防止程序控制流发生混乱)
 
@@ -312,7 +312,7 @@ result.n = n*r.n; result.d = d*r.d; return result;
   - ```cpp
     // 返回值是什么？
     // 应该返回该类型的引用，支持链式赋值
-    // (a = b).f() 返回值前不能加const，返回值有可能被改变 f()不一定是常成员函数
+    // (a = b).f() 返回值前不能加const，返回值有可能被改变f()不一定是常成员函数
     <Type>& operator=(<Type>& ){
         //...
         return *this;

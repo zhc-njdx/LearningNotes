@@ -73,7 +73,7 @@
       public:
         void push(T x);
         T pop();
-    };
+    }
     
     template <typename T, int size>
     void stack<T,size>::push(T x){} // 名称空间需要指明数据类型，因为不同数据类型对应不同的类，名称空间也是不一样的

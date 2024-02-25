@@ -374,7 +374,7 @@ informing the compiler: 改变编译器
 > 将某块内存清零
 >
 > ```cpp
-> void memset(void *pointer, unsigned size{
+> void memset(void *pointer, unsigned size){
 >     char *p = (char *)pointer;
 >     for(int i = 0; i < size; i++){
 >         *p++ = 0;
@@ -429,18 +429,18 @@ informing the compiler: 改变编译器
 
 
 
-- 数组变成表达式成分时，会进行类型转换(int * const)
+- 数组变成表达式成分时，会进行类型转换(int *)
 
 ```cpp
 void f(int a[], int n){
     for (int i = 0; i < n; i++){
-    	*(a + i) = 0; // *(a++) = 0; 错误,a不能移动??
+    	*(a + i) = 0;
 	}
 }
 
 int A[10];
 sizeof(A); // 10 * sizeof(int) 40
-sizeof(A+1); // sizeof(int) 指针类型数据的size(32位下是4;64位下是8) 数组变成表达式后类型变为int *const
+sizeof(A+1); // sizeof(int) 指针类型数据的size(32位下是4;64位下是8) 数组变成表达式后类型变为int *
 ```
 
 - 二维数组
@@ -478,7 +478,11 @@ int y[10][10];
 y == &y == y[0] == &y[0] == &y[0][0]
 ```
 
-
+- 一般情况下，数组变成表达式成分时，会进行类型转换变成 `int *`
+- 特殊情况：不会发生转换
+  - `&`
+  - `sizeof`
+  - 被字符串常量初始化了的字符数组
 
 ### 动态变量
 
